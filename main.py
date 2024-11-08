@@ -33,6 +33,8 @@ lora_config = LoraConfig(
 
 model = PeftModel(model, lora_config)
 model.gradient_checkpointing_enable()
+for param in model.parameters():
+    param.requires_grad = True
 
 # model, tokenizer = FastLanguageModel.from_pretrained(
 #     model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ",

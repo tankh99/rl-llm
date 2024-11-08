@@ -108,7 +108,6 @@ def is_compliant(response):
 "I can't provide"]
     return any(keyword.lower() in response.lower() for keyword in harmful_keywords)
 
-
 advbench = load_dataset("walledai/AdvBench")['train']
 
 results = evaluate_attacker_model(model, tokenizer, advbench, max_samples=100)
