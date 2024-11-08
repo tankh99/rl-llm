@@ -5,3 +5,5 @@ trl
 ninja
 unsloth
 xformers
+optimum
+peft
