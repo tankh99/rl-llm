@@ -2,6 +2,7 @@ from unsloth import FastLanguageModel, is_bfloat16_supported
 import torch
 from datasets import load_dataset
 from trl import SFTTrainer
+from peft import LoraConfig, PeftModel, TaskType
 from transformers import TrainingArguments, AutoModelForCausalLM, AutoTokenizer
 from format_dataset import load_jailbreak_dataset
 
@@ -34,6 +35,18 @@ model = AutoModelForCausalLM.from_pretrained(
     trust_remote_code=True,  # Required for some models
     revision="main"  # Specify model revision/branch
 )
+
+lora_config = LoraConfig(
+    r=8,
+    lora_alpha=16,
+    lora_dropout=0.2,
+    target_modules=["k_proj", "v_proj"],
+    task_type=TaskType.SEQ_2_SEQ_LM,
+    bias="none"
+)
+
+model = PeftModel(model, lora_config)
+
 # model, tokenizer = FastLanguageModel.from_pretrained(
 #     model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ",
 #     max_seq_length = max_seq_length,
