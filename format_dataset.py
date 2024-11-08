@@ -12,5 +12,5 @@ def format_jailbreak_instruction(examples, EOS_TOKEN):
 
 def load_jailbreak_dataset(EOS_TOKEN):
     dataset = load_dataset("json", data_files="./data/sample_jailbreaks.json", split="train")
-    dataset.map(lambda x: format_jailbreak_instruction(x, EOS_TOKEN), batched=True)
+    dataset = dataset.map(lambda x: format_jailbreak_instruction(x, EOS_TOKEN), batched=True)
     return dataset
