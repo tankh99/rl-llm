@@ -2,7 +2,7 @@ from unsloth import FastLanguageModel, is_bfloat16_supported
 import torch
 from datasets import load_dataset
 from trl import SFTTrainer
-from transformers import TrainingArguments, AutoModelForCausalLM
+from transformers import TrainingArguments, AutoModelForCausalLM, AutoTokenizer
 from format_dataset import load_jailbreak_dataset
 
 max_seq_length = 2048 # Choose any! We auto support RoPE Scaling internally!
@@ -25,11 +25,14 @@ fourbit_models = [
     "unsloth/gemma-2-27b-bnb-4bit",            # Gemma 2x faster!
 ] # More models at https://huggingface.co/unsloth
 
-model, tokenizer = AutoModelForCausalLM.from_pretrained(
-    model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ",
-    max_seq_length = max_seq_length,
-    dtype = dtype,
-    # token = "hf_...", # use one if using gated models like meta-llama/Llama-2-7b-hf
+tokenizer = AutoTokenizer.from_pretrained("TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ")
+
+# Load model
+model = AutoModelForCausalLM.from_pretrained(
+    "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ",
+    device_map="auto",  # Handles multi-GPU or CPU deployment
+    trust_remote_code=True,  # Required for some models
+    revision="main"  # Specify model revision/branch
 )
 # model, tokenizer = FastLanguageModel.from_pretrained(
 #     model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ",
