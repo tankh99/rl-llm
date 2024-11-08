@@ -18,7 +18,7 @@ model = AutoModelForCausalLM.from_pretrained(
     model_name,
     device_map="auto",  # Handles multi-GPU or CPU deployment
     trust_remote_code=True,  # Required for some models
-    revision="main"  # Specify model revision/branch
+    revision="main",  # Specify model revision/branch
     load_in_8bit=True,  # Use 'load_in_4bit=True' if supported
 )
 
