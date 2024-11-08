@@ -26,7 +26,7 @@ fourbit_models = [
 ] # More models at https://huggingface.co/unsloth
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-GGUF",
+    model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ",
     max_seq_length = max_seq_length,
     dtype = dtype,
     load_in_4bit = load_in_4bit,
