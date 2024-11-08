@@ -1,4 +1,4 @@
-from unsloth import FastLanguageModel, is_bfloat16_supported
+from unsloth import is_bfloat16_supported
 import torch
 from datasets import load_dataset
 from trl import SFTTrainer
@@ -19,7 +19,6 @@ model = AutoModelForCausalLM.from_pretrained(
     device_map="auto",  # Handles multi-GPU or CPU deployment
     trust_remote_code=True,  # Required for some models
     revision="main",  # Specify model revision/branch
-    load_in_8bit=True,  # Use 'load_in_4bit=True' if supported
 )
 
 lora_config = LoraConfig(
@@ -32,10 +31,11 @@ lora_config = LoraConfig(
 )
 
 model = PeftModel(model, lora_config)
-model.gradient_checkpointing_enable()
-for param in model.parameters():
-    param = param.float()
-    param.requires_grad = True
+model.print_trainable_parameters()
+# model.gradient_checkpointing_enable()
+# for param in model.parameters():
+#     param = param.float()
+#     param.requires_grad = True
 
 # model, tokenizer = FastLanguageModel.from_pretrained(
 #     model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ",
