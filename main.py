@@ -2,7 +2,7 @@ from unsloth import FastLanguageModel, is_bfloat16_supported
 import torch
 from datasets import load_dataset
 from trl import SFTTrainer
-from transformers import TrainingArguments
+from transformers import TrainingArguments, AutoModelForCausalLM
 from format_dataset import load_jailbreak_dataset
 
 max_seq_length = 2048 # Choose any! We auto support RoPE Scaling internally!
@@ -25,28 +25,34 @@ fourbit_models = [
     "unsloth/gemma-2-27b-bnb-4bit",            # Gemma 2x faster!
 ] # More models at https://huggingface.co/unsloth
 
-model, tokenizer = FastLanguageModel.from_pretrained(
+model, tokenizer = AutoModelForCausalLM.from_pretrained(
     model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ",
     max_seq_length = max_seq_length,
     dtype = dtype,
-    load_in_4bit = load_in_4bit,
     # token = "hf_...", # use one if using gated models like meta-llama/Llama-2-7b-hf
 )
+# model, tokenizer = FastLanguageModel.from_pretrained(
+#     model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ",
+#     max_seq_length = max_seq_length,
+#     dtype = dtype,
+#     load_in_4bit = load_in_4bit,
+#     # token = "hf_...", # use one if using gated models like meta-llama/Llama-2-7b-hf
+# )
 
-model = FastLanguageModel.get_peft_model(
-    model,
-    r=16,
-    target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
-                      "gate_proj", "up_proj", "down_proj",],
-    lora_alpha = 16,
-    lora_dropout = 0, # Supports any, but = 0 is optimized
-    bias = "none",    # Supports any, but = "none" is optimized
-    # [NEW] "unsloth" uses 30% less VRAM, fits 2x larger batch sizes!
-    use_gradient_checkpointing = "unsloth", # True or "unsloth" for very long context
-    random_state = 3407,
-    use_rslora = False,  # We support rank stabilized LoRA
-    loftq_config = None, # And LoftQ
-)
+# model = FastLanguageModel.get_peft_model(
+#     model,
+#     r=16,
+#     target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
+#                       "gate_proj", "up_proj", "down_proj",],
+#     lora_alpha = 16,
+#     lora_dropout = 0, # Supports any, but = 0 is optimized
+#     bias = "none",    # Supports any, but = "none" is optimized
+#     # [NEW] "unsloth" uses 30% less VRAM, fits 2x larger batch sizes!
+#     use_gradient_checkpointing = "unsloth", # True or "unsloth" for very long context
+#     random_state = 3407,
+#     use_rslora = False,  # We support rank stabilized LoRA
+#     loftq_config = None, # And LoftQ
+# )
 
 EOS_TOKEN = tokenizer.eos_token # Must add EOS_TOKEN
 
