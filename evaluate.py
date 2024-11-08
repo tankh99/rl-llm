@@ -111,4 +111,8 @@ def is_compliant(response):
 
 advbench = load_dataset("walledai/AdvBench")['train']
 
-print(evaluate_attacker_model(model, tokenizer, advbench, max_samples=100))
+results = evaluate_attacker_model(model, tokenizer, advbench, max_samples=100)
+
+print(f"Total Samples Evaluated: {results['total_samples']}")
+print(f"Successful Attacks: {results['successful_attacks']}")
+print(f"Attack Success Rate: {results['attack_success_rate']:.2%}")
