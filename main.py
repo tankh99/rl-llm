@@ -6,46 +6,33 @@ from peft import LoraConfig, PeftModel, TaskType
 from transformers import TrainingArguments, AutoModelForCausalLM, AutoTokenizer
 from format_dataset import load_jailbreak_dataset
 
-max_seq_length = 2048 # Choose any! We auto support RoPE Scaling internally!
+max_seq_length = 1024 # Choose any! We auto support RoPE Scaling internally!
 dtype = None # None for auto detection. Float16 for Tesla T4, V100, Bfloat16 for Ampere+
 load_in_4bit = True # Use 4bit quantization to reduce memory usage. Can be False.
 
-# 4bit pre quantized models we support for 4x faster downloading + no OOMs.
-fourbit_models = [
-    "unsloth/Meta-Llama-3.1-8B-bnb-4bit",      # Llama-3.1 15 trillion tokens model 2x faster!
-    "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit",
-    "unsloth/Meta-Llama-3.1-70B-bnb-4bit",
-    "unsloth/Meta-Llama-3.1-405B-bnb-4bit",    # We also uploaded 4bit for 405b!
-    "unsloth/Mistral-Nemo-Base-2407-bnb-4bit", # New Mistral 12b 2x faster!
-    "unsloth/Mistral-Nemo-Instruct-2407-bnb-4bit",
-    "unsloth/mistral-7b-v0.3-bnb-4bit",        # Mistral v3 2x faster!
-    "unsloth/mistral-7b-instruct-v0.3-bnb-4bit",
-    "unsloth/Phi-3.5-mini-instruct",           # Phi-3.5 2x faster!
-    "unsloth/Phi-3-medium-4k-instruct",
-    "unsloth/gemma-2-9b-bnb-4bit",
-    "unsloth/gemma-2-27b-bnb-4bit",            # Gemma 2x faster!
-] # More models at https://huggingface.co/unsloth
+model_name = "cognitivecomputations/Wizard-Vicuna-7B-Uncensored"
 
-tokenizer = AutoTokenizer.from_pretrained("TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ")
-
+tokenizer = AutoTokenizer.from_pretrained(model_name)
 # Load model
 model = AutoModelForCausalLM.from_pretrained(
-    "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ",
+    model_name,
     device_map="auto",  # Handles multi-GPU or CPU deployment
     trust_remote_code=True,  # Required for some models
     revision="main"  # Specify model revision/branch
+    load_in_8bit=True,  # Use 'load_in_4bit=True' if supported
 )
 
 lora_config = LoraConfig(
     r=8,
     lora_alpha=16,
     lora_dropout=0.2,
-    target_modules=["k_proj", "v_proj"],
-    task_type=TaskType.SEQ_2_SEQ_LM,
+    target_modules=["q_proj", "v_proj"],
+    task_type=TaskType.CAUSAL_LM,
     bias="none"
 )
 
 model = PeftModel(model, lora_config)
+model.gradient_checkpointing_enable()
 
 # model, tokenizer = FastLanguageModel.from_pretrained(
 #     model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ",
@@ -80,11 +67,11 @@ trainer = SFTTrainer(
     train_dataset = dataset,
     dataset_text_field = "text",
     max_seq_length = max_seq_length,
-    dataset_num_proc = 2,
+    dataset_num_proc = 4,
     packing = False, # Can make training 5x faster for short sequences.
     args = TrainingArguments(
-        per_device_train_batch_size = 2,
-        gradient_accumulation_steps = 4,
+        per_device_train_batch_size = 1,
+        gradient_accumulation_steps = 8,
         warmup_steps = 5,
         # num_train_epochs = 1, # Set this for 1 full training run.
         max_steps = 60,
