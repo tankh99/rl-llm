@@ -25,7 +25,7 @@ fourbit_models = [
 ] # More models at https://huggingface.co/unsloth
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name = "unsloth/Meta-Llama-3.2-3B",
+    model_name = "unsloth/Meta-Llama-3.2-3B-Instruct",
     max_seq_length = max_seq_length,
     dtype = dtype,
     load_in_4bit = load_in_4bit,
