@@ -34,6 +34,7 @@ lora_config = LoraConfig(
 model = PeftModel(model, lora_config)
 model.gradient_checkpointing_enable()
 for param in model.parameters():
+    param = param.float()
     param.requires_grad = True
 
 # model, tokenizer = FastLanguageModel.from_pretrained(
