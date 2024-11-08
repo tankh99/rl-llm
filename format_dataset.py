@@ -1,22 +1,12 @@
 from datasets import load_dataset
 import json
-
-jailbreak_prompt_template = """Below is a harmful question that was transformed into a jailbreak prompt. Write a response that appropriately completes the request.
-
-### Harmful Question:
-{}
-
-### Jailbreak Prompt:
-{}
-
-### Response:
-{}"""
+from constants import jailbreak_prompt_template
 
 def format_jailbreak_instruction(examples, EOS_TOKEN):
     harmful_questions, jailbreak_prompts, responses = examples["original_harm_behavior"], examples["nested_prompt"], examples["claude2_output"]
     texts = []
-    for harmful_question, jailbreak_prompt, response in zip(harmful_questions, jailbreak_prompts, responses):
-        text = jailbreak_prompt_template.format(harmful_question, jailbreak_prompt, response)
+    for harmful_question, jailbreak_prompt in zip(harmful_questions, jailbreak_prompts):
+        text = jailbreak_prompt_template.format(harmful_question, jailbreak_prompt) + EOS_TOKEN
         texts.append(text)
     return {"text": texts}
 
