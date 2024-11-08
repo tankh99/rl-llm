@@ -32,6 +32,7 @@ lora_config = LoraConfig(
 
 model = PeftModel(model, lora_config)
 model.print_trainable_parameters()
+
 # model.gradient_checkpointing_enable()
 # for param in model.parameters():
 #     param = param.float()
